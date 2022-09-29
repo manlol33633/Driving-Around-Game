@@ -14,6 +14,15 @@ public class CarMovement : MonoBehaviour
     private Rigidbody2D rb;
     private float tempSpeed;
     private Quaternion deltaRot;
+    void OnTriggerEnter2D(Collider2D other) {
+        if (other.gameObject.tag == "Road") {
+            maxSpeed = 15;
+        } else if (other.gameObject.tag == "Grass") {
+            maxSpeed = 6.42f;
+        } else if (other.gameObject.tag == "Mud") {
+            maxSpeed = 2.14f;
+        }
+    }
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -57,17 +66,6 @@ public class CarMovement : MonoBehaviour
             if (turn > 0 && turn <= 1) {
                 rb.MoveRotation(rb.rotation + rotSpeed * Time.fixedDeltaTime * (drive * tempSpeed * Time.fixedDeltaTime / (maxSpeed * 2)) * -turn);
             }
-        }
-    }
-    void OnTriggerEnter2D(Collider2D other) {
-        if (other.gameObject.tag == "Road") {
-            maxSpeed = 15;
-        } else if (other.gameObject.tag == "grass") {
-            maxSpeed = 6.42f;
-        } else if (other.gameObject.tag == "mud") {
-            maxSpeed = 2.14f;
-        } else {
-            maxSpeed = 15;
         }
     }
 }
