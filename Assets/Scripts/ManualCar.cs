@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-public class CarMovement : MonoBehaviour
+public class ManualCar : MonoBehaviour
 {
-    [SerializeField] private float maxSpeed = 15;
     [SerializeField] private float rotSpeed = 90;
     [SerializeField] private float drive;
     [SerializeField] private float driveRot;
@@ -16,7 +15,9 @@ public class CarMovement : MonoBehaviour
     [SerializeField] private Vector2 vel;
     [SerializeField] private TMP_Text textBox;
     [SerializeField] private float driftFactor;
-    private float tempSpeed;
+    [SerializeField] private float tempSpeed = 0;
+    [SerializeField] TMP_Text clutchText;
+    [SerializeField]
     public static float[] gearsPub = new float[6];
     private Rigidbody2D rb;
     private Quaternion deltaRot;
@@ -25,6 +26,8 @@ public class CarMovement : MonoBehaviour
     private Vector2 force;
     private Vector2 forwardVelocity;
     private Vector2 rightVelocity;
+    private int gear = 0;
+    public static float RPM;
     void OnTriggerEnter2D(Collider2D other) {
         switch (other.gameObject.tag) {
             case "Road":
@@ -43,26 +46,55 @@ public class CarMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         fillGears();
         gearsPub = gears;
-        tempSpeed = maxSpeed;
         driftFactor = 0.95f;
     }
     void Update()
     {
-        switch (Input.mouseScrollDelta.y) {
+        vel = rb.velocity;
+        if (Input.GetMouseButtonDown(0) && gear == -1 && Input.GetKey(KeyCode.C) && !Input.GetKey(KeyCode.W)) { gear++; }
+        if (Input.GetMouseButtonDown(0) && gear == 0 && Input.GetKey(KeyCode.C) && !Input.GetKey(KeyCode.W)) { gear++; }
+        if (Input.GetMouseButtonDown(0) && gear < 6 && Input.GetKey(KeyCode.C) && RPM > 2200 && RPM <= 2600 && !Input.GetKey(KeyCode.W)) { gear++; }
+        if (Input.GetMouseButtonDown(1) && gear > -1 && Input.GetKey(KeyCode.C) && RPM >= -50 && RPM < 200 && !Input.GetKey(KeyCode.W)) { gear--; }
+        textBox.text = "Gear: " + gear;
+        force = transform.up * drive;
+        if (Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.C) && gear != 0) {
+            if (drive <= tempSpeed) {
+                drive += 1 / reciprocalAcceleration;
+            } else {
+                drive -= 1 / reciprocalAcceleration;
+            }
+        }
+        if (gear == 1) {
+            RPM = (drive / tempSpeed) * 2500;
+        } else if (gear > 1 && gear <= 6) {
+            RPM = (drive / tempSpeed) * 2500;
+
+        }
+        switch (gear) {
             case -1:
-                textBox.text = "Reverse";
+                tempSpeed = -gears[1];
+                break;
+            case 0:
+                tempSpeed = 0;
                 break;
             case 1:
-                textBox.text = "Throttle";
+                tempSpeed = gears[0];
                 break;
-        }
-        force = transform.up * drive;
-        if (Input.GetKey(KeyCode.W)) {
-            if (textBox.text == "Throttle" && drive <= tempSpeed) {
-                drive += 1/reciprocalAcceleration;
-            } else if (textBox.text == "Reverse" && drive >= -tempSpeed/2) {
-                drive -= 1/reciprocalAcceleration;
-            }
+            case 2:
+                tempSpeed = gears[1];
+                break;
+            case 3:
+                tempSpeed = gears[2];
+                break;
+            case 4:
+                tempSpeed = gears[3];
+                break;
+            case 5:
+                tempSpeed = gears[4];
+                break;
+            case 6:
+                tempSpeed = gears[5];
+                break;
         }
         if (drive < 0 && Input.GetKey(KeyCode.Space)) {
             drive += 1/reciprocalAcceleration;
@@ -72,25 +104,16 @@ public class CarMovement : MonoBehaviour
         }
         driveRot = Input.GetAxis("Vertical");
         turn = Input.GetAxis("Horizontal");
-        TachometerNeedle.speed = drive;
-        if (drive >= 0 && drive < gears[0]) {
-            TachometerNeedle.rpmMode = 1;
-        } else if (drive >= gears[0] && drive < gears[1]) {
-            TachometerNeedle.rpmMode = 2;
-        } else if (drive >= gears[1] && drive < gears[2]) {
-            TachometerNeedle.rpmMode = 3;
-        }else if (drive >= gears[2] && drive < gears[3]) {
-            TachometerNeedle.rpmMode = 4;
-        } else if (drive >= gears[3] && drive < gears[4]) {
-            TachometerNeedle.rpmMode = 5;
-        } else if (drive >= gears[4] && drive < gears[5]) {
-            TachometerNeedle.rpmMode = 6;
-        } else if (drive >= gears[5]) {
-            TachometerNeedle.rpmMode = 7;
+        if (RPM > 2400 && RPM < 2600) {
+            clutchText.text = "Clutch";
+        } else if (RPM > -100 && RPM < 100) {
+            clutchText.text = "Clutch";
+        } else {
+            clutchText.text = "";
         }
+        Debug.Log(RPM);
     }
     void FixedUpdate() {
-        vel = rb.velocity;
         rb.AddForce(force, ForceMode2D.Force);
         forwardVelocity = transform.up * Vector2.Dot(rb.velocity, transform.up);
         rightVelocity = transform.right * Vector2.Dot(rb.velocity, transform.right);
@@ -115,33 +138,33 @@ public class CarMovement : MonoBehaviour
         if (vel.magnitude > 0.5f) {
             switch (surface) {
             case "Road": 
-                if (drive >= maxSpeed) {
+                if (drive >= tempSpeed) {
                     drive -= 1 / reciprocalAcceleration;
                     tempSpeed -= 1 / reciprocalAcceleration;
-                } else if (drive <= maxSpeed) {
+                } else if (drive <= tempSpeed) {
                     drive += 1 / reciprocalAcceleration;
                     tempSpeed += 1 / reciprocalAcceleration;
                 }
                 break;
             case "Grass": 
-                if (drive >= (maxSpeed * 3) / 7) {
+                if (drive >= (tempSpeed * 3) / 7) {
                     drive -= 1 / reciprocalAcceleration * 1.7f;
                     tempSpeed -= 1/reciprocalAcceleration * 1.7f;
-                } else if (drive <= (maxSpeed * 3) / 7) {
+                } else if (drive <= (tempSpeed * 3) / 7) {
                     drive += 1 / reciprocalAcceleration * 1.7f;
                     tempSpeed += 1 / reciprocalAcceleration * 1.7f;
                 }
                 break;
             case "Mud": 
-                if (drive >= maxSpeed / 7) {
+                if (drive >= tempSpeed / 7) {
                     drive -= 1 / reciprocalAcceleration * 3;
                     tempSpeed -= 1 / reciprocalAcceleration * 3;
-                } else if (drive <= maxSpeed / 7) {
+                } else if (drive <= tempSpeed / 7) {
                     drive += 1 / reciprocalAcceleration * 3;
                     tempSpeed += 1 / reciprocalAcceleration * 3;
                 }
                 break;
-        }
+            }
         }
     }
     void fillGears() {
@@ -151,5 +174,23 @@ public class CarMovement : MonoBehaviour
         gears[3] = 15.87f;
         gears[4] = 18.75f;
         gears[5] = 20.19f;
+    }
+    void Tachometer() {
+        TachometerNeedle.speed = drive;
+        if (drive >= 0 && drive < gears[0]) {
+            TachometerNeedle.rpmMode = 1;
+        } else if (drive >= gears[0] && drive < gears[1]) {
+            TachometerNeedle.rpmMode = 2;
+        } else if (drive >= gears[1] && drive < gears[2]) {
+            TachometerNeedle.rpmMode = 3;
+        }else if (drive >= gears[2] && drive < gears[3]) {
+            TachometerNeedle.rpmMode = 4;
+        } else if (drive >= gears[3] && drive < gears[4]) {
+            TachometerNeedle.rpmMode = 5;
+        } else if (drive >= gears[4] && drive < gears[5]) {
+            TachometerNeedle.rpmMode = 6;
+        } else if (drive >= gears[5]) {
+            TachometerNeedle.rpmMode = 7;
+        }
     }
 }

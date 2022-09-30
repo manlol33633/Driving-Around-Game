@@ -641,9 +641,9 @@ GameObject:
   m_Component:
   - component: {fileID: 769898834}
   - component: {fileID: 769898833}
-  - component: {fileID: 769898832}
   - component: {fileID: 769898835}
   - component: {fileID: 769898836}
+  - component: {fileID: 769898837}
   m_Layer: 0
   m_Name: Blue Car 1
   m_TagString: Untagged
@@ -651,35 +651,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &769898832
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 769898831}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d681cfe2fb58154e85f58a2821e9a43, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxSpeed: 8
-  rotSpeed: 2160
-  drive: 0
-  driveRot: 0
-  turn: 0
-  reciprocalAcceleration: 25
-  testRot: 0
-  gears:
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  vel: {x: 0, y: 0}
-  textBox: {fileID: 104093273}
-  driftFactor: 0.95
 --- !u!212 &769898833
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1006,6 +977,35 @@ PolygonCollider2D:
       - {x: 1.2486207, y: -12.005518}
       - {x: 1.4948276, y: -11.9937935}
       - {x: 1.7175863, y: -11.98207}
+--- !u!114 &769898837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 769898831}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18cd0fbcb0aa0cf4996a88bd673ac862, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotSpeed: 2160
+  drive: 0
+  driveRot: 0
+  turn: 0
+  reciprocalAcceleration: 100
+  testRot: 0
+  gears:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  vel: {x: 0, y: 0}
+  textBox: {fileID: 104093273}
+  driftFactor: 0
+  tempSpeed: 0
 --- !u!1 &823886835
 GameObject:
   m_ObjectHideFlags: 0
