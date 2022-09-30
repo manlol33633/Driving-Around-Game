@@ -25,7 +25,7 @@ public class CarMovement : MonoBehaviour
     private Vector2 force;
     private Vector2 forwardVelocity;
     private Vector2 rightVelocity;
-    void OnTriggerEnter2D(Collider2D other) {
+    void OnTriggerStay2D(Collider2D other) {
         switch (other.gameObject.tag) {
             case "Road":
                 surface = "Road";
@@ -112,8 +112,7 @@ public class CarMovement : MonoBehaviour
                 rb.MoveRotation(rb.rotation + rotSpeed * Time.fixedDeltaTime * (drive * tempSpeed * Time.fixedDeltaTime / (tempSpeed * 2)) * -turn);
             }
         }
-        if (vel.magnitude > 0.5f) {
-            switch (surface) {
+        switch (surface) {
             case "Road": 
                 if (drive >= maxSpeed) {
                     drive -= 1 / reciprocalAcceleration;
@@ -141,7 +140,6 @@ public class CarMovement : MonoBehaviour
                     tempSpeed += 1 / reciprocalAcceleration * 3;
                 }
                 break;
-        }
         }
     }
     void fillGears() {
